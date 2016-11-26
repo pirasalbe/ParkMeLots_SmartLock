@@ -10,7 +10,7 @@ class RaspClient
 {
     public static Socket connection;
     public static String tosend, receive, servername = "10.100.1.89", key = "0", signcode = "0", position = "0,0-0,0";
-    public static long  datastart, dataend; 
+    public static long datastart, dataend; 
     public static int updatecounter = 1, port = 2000, timer = 5000;
     public static byte[] res, length = new byte[4];
     public static InputStream in;
@@ -64,15 +64,15 @@ class RaspClient
     {
         String tmp = tosep;
         StringTokenizer st = new StringTokenizer(tmp, ";");
-        String[] out = new String[5];
+        String[] outp = new String[5];
         int i = 0;
         
         while (st.hasMoreElements())
         {
-            out[i] = (String) st.nextElement();
+            outp[i] = (String) st.nextElement();
             i++;
         }
-        return out;
+        return outp;
     }
     
     //send my values
