@@ -87,23 +87,17 @@ class RaspClient
     }
     
     //send my values
-    public static void update()
+    public static void update() throws Exception
     {
         tosend = "UPT";
-        try
-        {
-            send();
-            
-            tosend = key + ";" + signcode + ";" + datastart + ";" + dataend + ";" + longitude + ";" + latitude + ";" + rightSide;
-            send();
-            System.out.println("Update: " + updatecounter);
-            updatecounter++;
-            Thread.sleep(timer);
-        }
-        catch(Exception e)
-        {
-            System.err.println(e);
-        }
+        
+        send();
+
+        tosend = key + ";" + signcode + ";" + datastart + ";" + dataend + ";" + longitude + ";" + latitude + ";" + rightSide;
+        send();
+        System.out.println("Update: " + updatecounter);
+        updatecounter++;
+        Thread.sleep(timer);
     }
     
     public static void writeonfile(String rkey)
@@ -126,44 +120,32 @@ class RaspClient
         }
     }
     
-    public static void send()
+    public static void send() throws IOException
     {
-        try 
-        {
-            dIn = new DataInputStream(connection.getInputStream());
-            dOut = new DataOutputStream(connection.getOutputStream());
-            ByteBuffer buffer = ByteBuffer.allocate(4).order(ByteOrder.nativeOrder());
-            buffer.putInt(tosend.length());
+        dIn = new DataInputStream(connection.getInputStream());
+        dOut = new DataOutputStream(connection.getOutputStream());
+        ByteBuffer buffer = ByteBuffer.allocate(4).order(ByteOrder.nativeOrder());
+        buffer.putInt(tosend.length());
 
-            dOut.write(buffer.array());
-            dOut.flush();
-            dOut.writeBytes(tosend);
-            dOut.flush();
-        } 
-	catch (IOException e) 
-	{
-            e.printStackTrace();
-        }
+        dOut.write(buffer.array());
+        dOut.flush();
+        dOut.writeBytes(tosend);
+        dOut.flush();
     }
     
-    public static String recv()
+    public static String recv() throws Exception
     {
         String strRes = "";
-        try 
-        {            
-            dIn.read(length);
+        
+        dIn.read(length);
 
-            ByteBuffer wrapped = ByteBuffer.wrap(length);
-            wrapped.order(ByteOrder.LITTLE_ENDIAN);// big-endian by default
-            int num = wrapped.getInt();
-            res = new byte[num];
-            dIn.read(res);
-            strRes = new String(res, "ASCII");
-        }
-        catch(Exception e)
-        {
-            System.err.println(e);
-        }
+        ByteBuffer wrapped = ByteBuffer.wrap(length);
+        wrapped.order(ByteOrder.LITTLE_ENDIAN);// big-endian by default
+        int num = wrapped.getInt();
+        res = new byte[num];
+        dIn.read(res);
+        strRes = new String(res, "ASCII");
+            
         return strRes;
     }
     
@@ -175,7 +157,7 @@ class RaspClient
         assign(cat); //set values from my file
     }
     
-    public static void initialize() throws UnknownHostException, IOException
+    public static void initialize() throws Exception
     {
         updateValues();
 
@@ -195,8 +177,8 @@ class RaspClient
             {
                 key = recv(); //receive from server
                 writeonfile(key);
+                System.out.println("Received new key from the server.");
             }
-            System.out.println("Received new key from the server.");
             Timestamp endTime = new Timestamp(dataend);
             Timestamp now = new Timestamp(System.currentTimeMillis());
             
