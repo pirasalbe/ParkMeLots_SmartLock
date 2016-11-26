@@ -8,8 +8,8 @@ import java.util.StringTokenizer;
 class RaspClient
 {
     public static Socket connection;
-    public static String tosend, receive, servername = "10.100.1.89", key = "0", signcode, datastart, dataend, position;
-    public static int port = 2000, timer = 5000;
+    public static String tosend, receive, servername = "10.100.1.89", key = "0", signcode = "0", datastart = "01/01/2000-10:00", dataend = "02/02/2001-11:11", position = "0,0-0,0";
+    public static int updatecounter = 1, port = 2000, timer = 5000;
     public static byte[] res, length = new byte[4];
     public static InputStream in;
     public static InputStreamReader input;
@@ -27,10 +27,16 @@ class RaspClient
     public static String[] initfilereading()
     //key;signcode;datastart;dataend;coords
     {
-        File file = new File("clientconf.txt");
         String line = "";
-        try 
+        try
         {
+            File file = new File("clientconf.txt");
+            if (!file.exists())
+            {
+                file.createNewFile();
+                writeonfile("0");
+            }
+            
             FileReader reader = new FileReader(file);
             BufferedReader buffReader = new BufferedReader(reader);
             String s;
@@ -53,7 +59,7 @@ class RaspClient
     {
         String tmp = tosep;
         StringTokenizer st = new StringTokenizer(tmp, ";");
-        String[] out = new String[3];
+        String[] out = new String[5];
         int i = 0;
         
         while (st.hasMoreElements())
@@ -64,26 +70,17 @@ class RaspClient
         return out;
     }
     
-    public static void first()
-    {
-        tosend = "FRST";
-        try
-        {
-            coordsend();
-        }
-        catch(Exception e)
-        {
-            
-        }
-    }
-    
     public static void update()
     {
-        tosend = "UPD" + key;
+        tosend = "UPT";
         try
         {
             send();
-            assign(tokened(recv()));
+            
+            tosend = key + signcode + datastart + dataend + position;
+            send();
+            System.out.println("Update: " + updatecounter);
+            updatecounter++;
             Thread.sleep(timer);
         }
         catch(Exception e)
@@ -92,13 +89,28 @@ class RaspClient
         }
     }
     
-    public static void coordsend()
+    public static void writeonfile(String rkey)
     {
-        /*Per Piras:
-        dopo aver preso le coords, fai
-        tosend = (coords); //format: LONGITUDINE-LATITUDINE
-        send();
-        */
+        try 
+        {
+            String content = rkey + ";" + signcode + ";" + datastart + ";" + dataend + ";" + position;
+            
+            File file = new File("clientconf.txt");
+
+            if (!file.exists())
+            {
+                    file.createNewFile();
+            }
+            
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(content);
+            bw.close();
+        } 
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
     
     public static void send()
@@ -125,12 +137,7 @@ class RaspClient
     {
         String strRes = "";
         try 
-        {
-            /*in = connection.getInputStream();
-            input = new InputStreamReader(in);
-            sIN = new BufferedReader(input);
-            receive = sIN.readLine();*/
-            
+        {            
             dIn.read(length);
 
             ByteBuffer wrapped = ByteBuffer.wrap(length);
@@ -156,11 +163,19 @@ class RaspClient
         try
         {
             connection = new Socket(servername, port);
+            System.out.println("Connected to the server.");
             tosend = "SGN";
             send();
-            //System.out.println("Connected to the server.");
             
-            first();
+            tosend = key;
+            send();
+            
+            if (key.equals("0"))
+            {
+                key = recv();
+            }
+            System.out.println("Received new key from the server.");
+            //first();
             while(true)
             {
                 update();
@@ -175,12 +190,7 @@ class RaspClient
             System.err.println(e);
         }
     }
-    
-    /*public static String chainfive(String[] input)
-    {
-        return input[0] + input[1] + input[2] + input[3] + input[4];
-    }*/
-    
+
     public static void assign(String[] input)
     {
         key = input[0];
