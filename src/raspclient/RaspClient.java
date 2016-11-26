@@ -9,9 +9,9 @@ import java.util.StringTokenizer;
 class RaspClient
 {
     public static Socket connection;
-    public static String tosend, receive, servername = "10.100.1.89", key = "0", signcode = "0", position = "0,0-0,0";
-    public static long datastart, dataend; 
-    public static int updatecounter = 1, port = 2000, timer = 5000;
+    public static String tosend, receive, servername = "10.100.1.89", key = "0", signcode = "0", longitude = "0,0", latitude = "0,0", rightSide = "1";
+    public static long datastart, dataend;
+    public static int updatecounter = 1, port = 2000, timer = 2000;
     public static byte[] res, length = new byte[4];
     public static InputStream in;
     public static InputStreamReader input;
@@ -64,7 +64,7 @@ class RaspClient
     {
         String tmp = tosep;
         StringTokenizer st = new StringTokenizer(tmp, ";");
-        String[] outp = new String[5];
+        String[] outp = new String[7];
         int i = 0;
         
         while (st.hasMoreElements())
@@ -83,7 +83,7 @@ class RaspClient
         {
             send();
             
-            tosend = key + signcode + datastart + dataend + position;
+            tosend = key + signcode + datastart + dataend + longitude + latitude + rightSide;
             send();
             System.out.println("Update: " + updatecounter);
             updatecounter++;
@@ -99,7 +99,7 @@ class RaspClient
     {
         try 
         {
-            String content = rkey + ";" + signcode + ";" + datastart + ";" + dataend + ";" + position;
+            String content = rkey + ";" + signcode + ";" + datastart + ";" + dataend + ";" + longitude + ";" + latitude + ";" + rightSide;
             
             File file = new File(Fname);
             
@@ -185,15 +185,15 @@ class RaspClient
             if (key.equals("0"))
             {
                 key = recv(); //receive from server
+                writeonfile(key);
             }
             System.out.println("Received new key from the server.");
-            //first();
             Timestamp endTime = new Timestamp(dataend);
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            while(endTime.compareTo(now)>=0)
+            while(endTime.compareTo(now)<=0)
             {
-                updateValues();
                 update(); //send update
+                updateValues();
             }
         }
         catch (UnknownHostException e)
@@ -212,6 +212,8 @@ class RaspClient
         signcode = input[1];
         datastart = Long.parseLong(input[2]);
         dataend = Long.parseLong(input[3]);
-        position = input[4];
+        longitude = input[4];
+        latitude = input[5];
+        rightSide = input[6];
     }
 }
