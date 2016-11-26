@@ -94,7 +94,7 @@ class RaspClient
         {
             send();
             
-            tosend = key + signcode + datastart + dataend + longitude + latitude + rightSide;
+            tosend = key + ";" + signcode + ";" + datastart + ";" + dataend + ";" + longitude + ";" + latitude + ";" + rightSide;
             send();
             System.out.println("Update: " + updatecounter);
             updatecounter++;

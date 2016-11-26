@@ -18,11 +18,22 @@ class RaspClient
     public static DataInputStream dIn;
     public static DataOutputStream dOut;
     public static String Fname = "clientconf.txt";
+    public static boolean close = false;
     
     
     public static void main(String[] args)
     {
-       initialize();
+        while(!close)
+        {
+            try
+            {
+                initialize();
+            }
+            catch (Exception e)
+            {
+                System.out.println(e);
+            }
+        }
     }
     
     public static String[] initfilereading()
@@ -81,7 +92,7 @@ class RaspClient
         {
             send();
             
-            tosend = key + signcode + datastart + dataend + longitude + latitude + rightSide;
+            tosend = key + ";" + signcode + ";" + datastart + ";" + dataend + ";" + longitude + ";" + latitude + ";" + rightSide;
             send();
             System.out.println("Update: " + updatecounter);
             updatecounter++;
@@ -162,12 +173,10 @@ class RaspClient
         assign(cat); //set values from my file
     }
     
-    public static void initialize() 
+    public static void initialize() throws UnknownHostException, IOException
     {
         updateValues();
-        
-        try
-        {
+
             //socket
             connection = new Socket(servername, port);
             System.out.println("Connected to the server.");
@@ -188,20 +197,15 @@ class RaspClient
             System.out.println("Received new key from the server.");
             Timestamp endTime = new Timestamp(dataend);
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            while(endTime.compareTo(now)<=0)
+            
+            if(endTime.compareTo(now)>=0)
+                close=true;
+            
+            while(!close)
             {
                 update(); //send update
                 updateValues();
             }
-        }
-        catch (UnknownHostException e)
-        {
-            System.err.println(e);
-        }
-        catch (IOException e)
-        {
-            System.err.println(e);
-        }
     }
 
     public static void assign(String[] input)
