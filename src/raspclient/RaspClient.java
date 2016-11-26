@@ -44,7 +44,7 @@ class RaspClient
             FileReader reader = new FileReader(file);
             BufferedReader buffReader = new BufferedReader(reader);
             String s;
-            while((s = buffReader.readLine()) != null)
+            if((s = buffReader.readLine()) != null)
             {
                 line = s;
             }
