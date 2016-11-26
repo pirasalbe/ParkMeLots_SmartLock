@@ -1,5 +1,6 @@
 package raspclient;
 
+import java.sql.Timestamp;
 import java.net.*;
 import java.io.*;
 import java.nio.*;
@@ -187,7 +188,9 @@ class RaspClient
             }
             System.out.println("Received new key from the server.");
             //first();
-            while(true)
+            Timestamp endTime = new Timestamp(dataend);
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            while(endTime.compareTo(now)>=0)
             {
                 updateValues();
                 update(); //send update
