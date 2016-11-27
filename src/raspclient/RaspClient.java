@@ -9,7 +9,7 @@ import java.util.StringTokenizer;
 class RaspClient
 {
     public static Socket connection;
-    public static String tosend, receive, servername = "10.100.1.89", key = "0", signcode = "15", longitude = "0,0", latitude = "0,0", rightSide = "1";
+    public static String tosend, receive, servername = "10.100.1.89", key = "0", signcode = "0", longitude = "0,0", latitude = "0,0", rightSide = "1";
     public static long datastart, dataend;
     public static int updatecounter = 1, port = 2000, timer = 2000;
     public static byte[] res, length = new byte[4];
