@@ -135,7 +135,7 @@ class RaspClient
     
     public static String recv() throws Exception
     {
-        String strRes = "";
+        String strRes;
         
         dIn.read(length);
 
@@ -160,36 +160,35 @@ class RaspClient
     public static void initialize() throws Exception
     {
         updateValues();
+        //socket
+        connection = new Socket(servername, port);
+        System.out.println("Connected to the server.");
 
-            //socket
-            connection = new Socket(servername, port);
-            System.out.println("Connected to the server.");
-            
-            //initialize server
-            tosend = "SGN";
-            send();
-            
-            //key generator
-            tosend = key;
-            send();
-            
-            if (key.equals("0"))
-            {
-                key = recv(); //receive from server
-                writeonfile(key);
-                System.out.println("Received new key " + key + " from the server. ");
-            }
-            Timestamp endTime = new Timestamp(dataend);
-            Timestamp now = new Timestamp(System.currentTimeMillis());
-            
-            if(endTime.compareTo(now)>=0)
-                close=true;
-            
-            while(!close)
-            {
-                update(); //send update
-                updateValues();
-            }
+        //initialize server
+        tosend = "SGN";
+        send();
+
+        //key generator
+        tosend = key;
+        send();
+
+        if (key.equals("0"))
+        {
+            key = recv(); //receive from server
+            writeonfile(key);
+            System.out.println("Received new key " + key + " from the server. ");
+        }
+        Timestamp endTime = new Timestamp(dataend);
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
+        if(endTime.compareTo(now)>=0)
+            close=true;
+
+        while(!close)
+        {
+            update(); //send update
+            updateValues();
+        }
     }
 
     public static void assign(String[] input)
